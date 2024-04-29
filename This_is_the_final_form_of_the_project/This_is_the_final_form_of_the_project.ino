@@ -9,18 +9,11 @@
 // Define the I2C address for the TCA9548A I2C multiplexer
 #define TCA_ADDR 0x70
 
-// WiFi credentials and Messaging API details
-//const char* ssid = "mlive";
-//const char* password = "dontusemywifi";
-//const char* ssid = "get your own wifi";
-//const char* password = "hgom4245";
-//String phoneNumber = "+353892439462"; // Example phone number
-//String apiKey = "4407592"; // Example API key
 
 const char* ssid = "mlive";
 const char* password = "dontusemywifi";
 String phoneNumber = "+353856393145"; // Example phone number
-String apiKey = "4473681"; // Example API key
+String apiKey = "4463681"; // Example API key
 
 Adafruit_MPU6050 mpu;
 Adafruit_DRV2605 drv1, drv2, drv3;
@@ -69,11 +62,11 @@ void setup() {
     mpu.setAccelerometerRange(MPU6050_RANGE_16_G);
     mpu.setGyroRange(MPU6050_RANGE_2000_DEG);
   }
-  //Wire.begin(); // Initialize I2C
-  //if (!mpu.begin()) {
-    //Serial.println("MPU6050 not found");
-    //while (1) yield();
-  //}
+  Wire.begin(); // Initialize I2C
+  if (!mpu.begin()) {
+    Serial.println("MPU6050 not found");
+   while (1) yield();
+ }
 
   //mpu.setAccelerometerRange(MPU6050_RANGE_16_G);
   //mpu.setGyroRange(MPU6050_RANGE_2000_DEG);
@@ -95,18 +88,18 @@ void loop() {
   mpu.getEvent(&a, &g, &temp);
 
   // Fall detection logic
-  //if (abs(g.gyro.x) > 90 || abs(g.gyro.y) > 100 || abs(g.gyro.z) > 90) {
-    //Serial.println("Fall detected! Sending message...");
-    //sendMessage("Urgent: A fall has been detected!");
-    //delay(10000); // Delay to avoid repeated messages
-  //}
+  if (abs(g.gyro.x) > 90 || abs(g.gyro.y) > 100 || abs(g.gyro.z) > 90) {
+    Serial.println("Fall detected! Sending message...");
+    sendMessage("Urgent: A fall has been detected!");
+    delay(10000); // Delay to avoid repeated messages
+  }
 
-  //if (a.acceleration.y < -9.8 || a.acceleration.y > 9.8) {
-    //Serial.println("Condition to send message met");
-    //sendMessage("Device is upside down!");
-    //Serial.println("After send message"); // Check if it returns from sendMessage
-    //delay(10000);
-  //}
+ if (a.acceleration.y < -9.8 || a.acceleration.y > 9.8) {
+    Serial.println("Condition to send message met");
+    sendMessage("Device is upside down!");
+    Serial.println("After send message"); // Check if it returns from sendMessage
+    delay(10000);
+  }
 
   // Measure distances and trigger haptic feedback
   float distanceCm1 = measureDistance(trigPin1, echoPin1);
@@ -134,13 +127,13 @@ float measureDistance(int trigPin, int echoPin) {
   digitalWrite(trigPin, LOW);
   long duration = pulseIn(echoPin, HIGH, TIMEOUT_MICROSECONDS);
   if (duration == 0) {
-    //Serial.println("No echo received or out of range");
+    Serial.println("No echo received or out of range");
     return -1.0;  // No echo received or object is out of range
   } else {
     float distance = duration * SOUND_SPEED / 2;
     if (distance < 10 || distance > 400) {
-      //Serial.print("Distance out of range: ");
-      //Serial.println(distance);
+      Serial.print("Distance out of range: ");
+      Serial.println(distance);
       return -1.0;  // Distance out of expected range
     }
     return distance;
@@ -187,10 +180,10 @@ void triggerHaptic(uint8_t tcaChannel, Adafruit_DRV2605 &drv, float distance) {
         intensity = "Mild";
     }
     
-    //Serial.print("Distance: ");
-    //Serial.print(distance);
-    //Serial.print(" cm - Vibration Intensity: ");
-    //Serial.println(intensity);
+    Serial.print("Distance: ");
+    Serial.print(distance);
+    Serial.print(" cm - Vibration Intensity: ");
+    Serial.println(intensity);
 
     tcaSelect(tcaChannel);
     drv.setWaveform(0, effect);
